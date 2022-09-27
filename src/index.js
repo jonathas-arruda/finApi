@@ -1,9 +1,29 @@
+const { response } = require("express");
 const express = require("express");
+const { customQueryHandlerNames } = require("puppeteer");
+const { v4: uuidv4 } = require("uuid");
 
- const app = express()
+const app = express();
+app.use(express.json());
 
- app.listen(3000)
+app.listen(3000);
 
- app.get("/", (req,res)=>{
-  return res.json({message:" oi"})
- })
+const customers = [];
+
+app.post("/account", (request, response) => {
+  const { cpf, name } = request.body;
+  const customerAlreadyExists = customers.some((customer) => customer.cpf === cpf );
+
+  if (customerAlreadyExists) {
+    return response.status(400).json({ error: "Customer Already Exists!" });
+  }
+
+  customers.push({
+    cpf,
+    name,
+    id:uuidv4(),
+    statement: [],
+  });
+  console.log(customers)
+  return response.status(201).send();
+});
