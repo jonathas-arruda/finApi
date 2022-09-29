@@ -33,11 +33,11 @@ function getBalance(statement){
         return acc - operation.amount;
       }
     },0)
-  console.log(balance)
 
     return balance;
   }
 
+//CREATING ACCOUNT
 app.post("/account", (request, response) => {
   const { cpf, name } = request.body;
   const customerAlreadyExists = customers.some(
@@ -57,18 +57,32 @@ app.post("/account", (request, response) => {
   return response.status(201).send();
 });
 
+//STATEMENT
 app.get("/statement", verifyIfExistsAccountCPF, (request, response) => {
   const {customer} = request ;
   return response.json(customer.statement);
 });
 
+app.get("/statement/date", verifyIfExistsAccountCPF, (request, response) => {
+  const {customer} = request ;
+  const {date} = request.query ;
+  
+  const dateFormat = new Date(date + " 00:00")
+
+  const statement = customer.statement.filter((statement) => statement.created_at.toDateString() === new Date(dateFormat).toDateString())
+  
+  return response.json(statement);
+  
+});
+
+//DEPOSIT
 app.post("/deposit", verifyIfExistsAccountCPF, (request, response) => {
   const {customer} = request ;
   const {description, amount} = request.body ;
   const statementOperation ={
     description,
     amount,
-    ceated_at: new Date(),
+    created_at: new Date(),
     type:"credit"
   }
   customer.statement.push(statementOperation)
@@ -77,7 +91,7 @@ app.post("/deposit", verifyIfExistsAccountCPF, (request, response) => {
 
 })
 
-//Saque 
+//WITHDRAW 
 app.post("/withdraw", verifyIfExistsAccountCPF, (request, response) => {
   const {amount} = request.body ;
   const {customer} = request ;
@@ -88,7 +102,7 @@ app.post("/withdraw", verifyIfExistsAccountCPF, (request, response) => {
   }
   const statementOperation ={
     amount,
-    ceated_at: new Date(),
+    created_at: new Date(),
     type:"debit"
   }
   customer.statement.push(statementOperation)
