@@ -96,6 +96,7 @@ app.post("/deposit", verifyIfExistsAccountCPF, (request, response) => {
 app.post("/withdraw", verifyIfExistsAccountCPF, (request, response) => {
   const { amount } = request.body;
   const { customer } = request;
+
   const balance = getBalance(customer.statement);
 
   if (balance < amount) {
@@ -129,3 +130,12 @@ app.get("/account", verifyIfExistsAccountCPF, (request, response) => {
 
 });
 
+
+app.delete("/account", verifyIfExistsAccountCPF, (request, response) => {
+  const { customer } = request;
+
+  customers.splice(customer, 1)
+
+  return response.status(200).json(customer)
+
+})
